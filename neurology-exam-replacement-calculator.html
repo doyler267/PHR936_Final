@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Model final-exam replacement scenarios for the neurology course.">
+  <title>Neurology Exam Replacement Calculator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17332f;
+      --muted: #61706c;
+      --paper: #f7f5ef;
+      --card: rgba(255, 255, 255, 0.86);
+      --line: #d7ded9;
+      --teal: #087d72;
+      --teal-dark: #075c55;
+      --mint: #dff3eb;
+      --gold: #d3a448;
+      --gold-soft: #fbf0d5;
+      --danger: #a33f37;
+      --danger-soft: #fae7e4;
+      --shadow: 0 18px 50px rgba(28, 59, 52, 0.09);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(211, 164, 72, 0.15), transparent 25rem),
+        radial-gradient(circle at 88% 22%, rgba(8, 125, 114, 0.12), transparent 27rem),
+        var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+
+    .page-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 54px 0 48px;
+    }
+
+    header {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(30px, 6vw, 64px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,248,244,0.9));
+      box-shadow: var(--shadow);
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -84px;
+      top: -90px;
+      border: 34px solid rgba(8, 125, 114, 0.08);
+      border-radius: 50%;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--teal-dark);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin-bottom: 18px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.35rem, 6vw, 4.9rem);
+      font-weight: 500;
+      letter-spacing: -0.045em;
+      line-height: 0.98;
+    }
+
+    .lede {
+      position: relative;
+      z-index: 1;
+      max-width: 670px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.17rem);
+    }
+
+    .workspace {
+      margin-top: 24px;
+    }
+
+    .panel {
+      padding: clamp(24px, 4vw, 36px);
+      border: 1px solid rgba(215, 222, 217, 0.9);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel h2 {
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.6rem, 3vw, 2.15rem);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+    }
+
+    .helper {
+      margin-bottom: 26px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .score-fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+    .field label,
+    .scenario-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      font-size: 0.9rem;
+      font-weight: 750;
+    }
+
+    .field label span,
+    .scenario-label span { color: var(--muted); font-weight: 600; }
+
+    input[type="number"] {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 15px;
+      color: var(--ink);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: rgba(255,255,255,0.96);
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(8, 125, 114, 0.12);
+    }
+
+    input[aria-invalid="true"] {
+      border-color: var(--danger);
+      background: #fffafa;
+    }
+
+    .error {
+      min-height: 20px;
+      margin: 5px 2px 0;
+      color: var(--danger);
+      font-size: 0.8rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:focus-visible { outline: 3px solid rgba(8,125,114,0.28); outline-offset: 3px; }
+
+    .primary { color: white; background: var(--teal); }
+    .primary:hover { background: var(--teal-dark); }
+    .secondary { color: var(--teal-dark); background: var(--mint); }
+
+    .mini-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .mini-stat {
+      padding: 15px;
+      border-radius: 14px;
+      background: #f2f5f2;
+    }
+
+    .mini-stat small { display: block; color: var(--muted); font-weight: 650; }
+    .mini-stat strong { display: block; margin-top: 3px; font-size: 1.1rem; }
+
+    .scenario {
+      margin-top: 24px;
+      padding: clamp(24px, 4vw, 36px);
+      border-radius: var(--radius-lg);
+      color: white;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .scenario h2 {
+      margin-bottom: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.65rem, 4vw, 2.6rem);
+      font-weight: 500;
+    }
+
+    .scenario .helper { color: #b8c8c3; }
+    .scenario-controls { display: grid; gap: 22px; }
+    .scenario-label span { color: #c7d5d1; }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #75d1bc;
+      cursor: pointer;
+    }
+
+    .projection {
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.07);
+      text-align: center;
+    }
+
+    .projection small { color: #b8c8c3; }
+    .projection-score {
+      display: block;
+      margin: 3px 0 7px;
+      color: #f7e2ad;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.8rem, 7vw, 4.5rem);
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .projection-grade { margin: 0; font-weight: 750; }
+
+    .projection-replacement {
+      margin: 16px 0 0;
+      padding-top: 16px;
+      color: #c7d5d1;
+      border-top: 1px solid rgba(255,255,255,0.14);
+      font-size: 0.84rem;
+    }
+
+    details {
+      margin-top: 24px;
+      padding: 0 6px;
+      color: var(--muted);
+    }
+
+    summary {
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    details p { margin: 12px 0 0; max-width: 900px; font-size: 0.9rem; }
+    code { color: var(--teal-dark); font-weight: 800; }
+
+    footer {
+      padding: 26px 8px 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 860px) {
+      .scenario-grid { grid-template-columns: 1fr; }
+      .score-fields { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 580px) {
+      .page-shell { width: min(100% - 20px, 1120px); padding-top: 10px; }
+      header { padding: 28px 22px; border-radius: 22px; }
+      .panel, .scenario { padding: 22px 18px; border-radius: 20px; }
+      .mini-summary { grid-template-columns: 1fr; }
+      .actions { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <header>
+      <p class="eyebrow">Neurology course planner</p>
+      <h1>Make a clear plan for the final.</h1>
+      <p class="lede">Enter your three unit-exam scores, then use the sliders to explore different cumulative and non-cumulative final-exam scenarios.</p>
+    </header>
+
+    <section class="workspace" aria-label="Exam replacement calculator">
+      <form class="panel" id="scoreForm" novalidate>
+        <h2>Your scores</h2>
+        <p class="helper">Enter a score from 0 to 40 for each unit exam. Decimals are okay.</p>
+
+        <div class="score-fields">
+          <div class="field">
+            <label for="exam1">Exam 1 <span>out of 40</span></label>
+            <input id="exam1" name="exam1" type="number" min="0" max="40" step="0.1" inputmode="decimal" autocomplete="off" placeholder="e.g., 34">
+            <p class="error" id="exam1Error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="exam2">Exam 2 <span>out of 40</span></label>
+            <input id="exam2" name="exam2" type="number" min="0" max="40" step="0.1" inputmode="decimal" autocomplete="off" placeholder="e.g., 31.5">
+            <p class="error" id="exam2Error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="exam3">Exam 3 <span>out of 40</span></label>
+            <input id="exam3" name="exam3" type="number" min="0" max="40" step="0.1" inputmode="decimal" autocomplete="off" placeholder="e.g., 37">
+            <p class="error" id="exam3Error" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">Build my scenario</button>
+          <button class="secondary" type="button" id="resetButton">Start over</button>
+        </div>
+
+        <div class="mini-summary" id="summary" hidden>
+          <div class="mini-stat">
+            <small>Lowest exam / replacement mark</small>
+            <strong id="droppedScore">—</strong>
+          </div>
+          <div class="mini-stat">
+            <small>Current unit-exam points</small>
+            <strong id="retainedScore">—</strong>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="scenario" id="scenario" hidden>
+      <div class="scenario-grid">
+        <div>
+          <h2>Explore your final scenario</h2>
+          <p class="helper">Move the sliders to see how the two final sections change your projected course-exam total.</p>
+          <div class="scenario-controls">
+            <div>
+              <label class="scenario-label" for="cumulativeRange">Cumulative portion <span><output id="cumulativeOutput">30</output>/40</span></label>
+              <input id="cumulativeRange" type="range" min="0" max="40" value="30" step="0.5">
+            </div>
+            <div>
+              <label class="scenario-label" for="nonCumulativeRange">Non-cumulative portion <span><output id="nonCumulativeOutput">30</output>/40</span></label>
+              <input id="nonCumulativeRange" type="range" min="0" max="40" value="30" step="0.5">
+            </div>
+          </div>
+        </div>
+        <div class="projection">
+          <small>Projected course-exam points</small>
+          <strong class="projection-score"><span id="projectedTotal">—</span><span aria-hidden="true">/200</span></strong>
+          <p class="projection-grade" id="projectedGrade">Enter your exam scores first.</p>
+          <p class="projection-replacement" id="replacementStatus"></p>
+        </div>
+      </div>
+    </section>
+
+    <details>
+      <summary>How the replacement calculation works</summary>
+      <p>Your three original unit-exam scores and both parts of the final are counted first. If—and only if—the cumulative final score is higher than your lowest unit-exam score, the lowest score is then replaced. In symbols: <code>Exam 1 + Exam 2 + Exam 3 + cumulative + non-cumulative + replacement gain</code>, where the <code>replacement gain</code> is the amount by which the cumulative score exceeds the lowest unit exam. The maximum is 200 points.</p>
+      <p>Before the cumulative score passes your lowest unit-exam score, a cumulative point and a non-cumulative point have the same effect. Above that mark, each additional cumulative point adds two course points—one on the final and one through replacement. Use the sliders to compare any combination you want. Your instructor’s official gradebook and syllabus remain the final authority.</p>
+    </details>
+
+    <footer>This planning tool estimates exam points only. Confirm course policies and rounding rules with your instructor.</footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const form = document.getElementById("scoreForm");
+      const inputs = ["exam1", "exam2", "exam3"].map(id => document.getElementById(id));
+      const summary = document.getElementById("summary");
+      const scenario = document.getElementById("scenario");
+      const cumulativeRange = document.getElementById("cumulativeRange");
+      const nonCumulativeRange = document.getElementById("nonCumulativeRange");
+      let retainedPoints = null;
+
+      function format(value) {
+        return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
+      }
+
+      function validate() {
+        let valid = true;
+        const scores = [];
+
+        inputs.forEach(input => {
+          const error = document.getElementById(`${input.id}Error`);
+          const raw = input.value.trim();
+          const score = Number(raw);
+          let message = "";
+
+          if (raw === "") message = "Enter a score.";
+          else if (!Number.isFinite(score)) message = "Enter a number.";
+          else if (score < 0 || score > 40) message = "Use a score from 0 to 40.";
+
+          input.setAttribute("aria-invalid", message ? "true" : "false");
+          error.textContent = message;
+          if (message) valid = false;
+          scores.push(score);
+        });
+
+        return valid ? scores : null;
+      }
+
+      function calculate() {
+        const scores = validate();
+        if (!scores) return;
+
+        const sorted = scores.slice().sort((a, b) => a - b);
+        const dropped = sorted[0];
+        retainedPoints = scores.reduce((sum, score) => sum + score, 0);
+
+        document.getElementById("droppedScore").textContent = `${format(dropped)}/40`;
+        document.getElementById("retainedScore").textContent = `${format(retainedPoints)}/120`;
+        summary.hidden = false;
+
+        scenario.hidden = false;
+        updateProjection();
+      }
+
+      function updateProjection() {
+        const cumulative = Number(cumulativeRange.value);
+        const nonCumulative = Number(nonCumulativeRange.value);
+        document.getElementById("cumulativeOutput").textContent = format(cumulative);
+        document.getElementById("nonCumulativeOutput").textContent = format(nonCumulative);
+
+        if (retainedPoints === null) return;
+        const lowest = Math.min(...inputs.map(input => Number(input.value)));
+        const replacementGain = Math.max(0, cumulative - lowest);
+        const total = retainedPoints + cumulative + nonCumulative + replacementGain;
+        let label = "Below the C threshold";
+        if (total >= 179) label = "A range";
+        else if (total >= 159) label = "B range";
+        else if (total >= 139) label = "C range";
+
+        document.getElementById("projectedTotal").textContent = format(total);
+        document.getElementById("projectedGrade").textContent = label;
+        document.getElementById("replacementStatus").textContent = replacementGain > 0
+          ? `Replacement applies: ${format(cumulative)}/40 replaces your ${format(lowest)}/40 lowest unit exam.`
+          : `No replacement at this score: the cumulative portion must be higher than ${format(lowest)}/40.`;
+      }
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        calculate();
+      });
+
+      inputs.forEach(input => {
+        input.addEventListener("input", () => {
+          if (input.getAttribute("aria-invalid") === "true") validate();
+        });
+      });
+
+      [cumulativeRange, nonCumulativeRange].forEach(range => range.addEventListener("input", updateProjection));
+
+      document.getElementById("resetButton").addEventListener("click", () => {
+        form.reset();
+        inputs.forEach(input => {
+          input.setAttribute("aria-invalid", "false");
+          document.getElementById(`${input.id}Error`).textContent = "";
+        });
+        retainedPoints = null;
+        summary.hidden = true;
+        scenario.hidden = true;
+        cumulativeRange.value = 30;
+        nonCumulativeRange.value = 30;
+        updateProjection();
+        inputs[0].focus();
+      });
+    })();
+  </script>
+</body>
+</html>
